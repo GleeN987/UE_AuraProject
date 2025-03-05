@@ -4,11 +4,50 @@
 #include "Player/AuraPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Interaction/EnemyInterface.h"
 
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+}
+
+void AAuraPlayerController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+
+	CursorTrace();
+	
+}
+
+void AAuraPlayerController::CursorTrace()
+{
+	FHitResult CursorHit;
+	GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, CursorHit);
+	if (!CursorHit.bBlockingHit) return;
+	LastActor = ThisActor;
+	ThisActor = CursorHit.GetActor();
+		
+	/*
+	 * line trace scenarios:
+	 * last and this actor == null -> do nothing
+	 * last == null && thisactor is enemyinterface -> highlight this actor
+	 * last is enemyinterface && thisactor == null -> remove highlight from last
+	 * both are enemyinterface but they are not equal -> unhighlight last, highlight this
+	 * both are valid and same -> do nothing
+	 */
+	if (ThisActor != LastActor)
+	{
+		if (LastActor != nullptr)
+		{
+			LastActor->UnHighlightActor();
+		}
+     
+		if (ThisActor != nullptr)
+		{
+			ThisActor->HighlightActor();
+		}
+	}
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -21,7 +60,7 @@ void AAuraPlayerController::BeginPlay()
 	Subsystem->AddMappingContext(AuraContext, 0);
 
 	bShowMouseCursor = true;
-	DefaultMouseCursor = EMouseCursor::Default;
+	DefaultMouseCursor = EMouseCursor::Crosshairs;
 
 	FInputModeGameAndUI InputModeData;
 	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
