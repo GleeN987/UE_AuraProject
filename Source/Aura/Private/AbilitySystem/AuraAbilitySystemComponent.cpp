@@ -13,12 +13,9 @@ void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 void UAuraAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
                                                 const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
 {
-	//get effect tags to broadcast them to widget controller so we can show something in hud
+	//get effect tags and broadcast them to widget controller so we can show something in hud
 	FGameplayTagContainer EffectTags;
 	EffectSpec.GetAllAssetTags(EffectTags);
-	for (const FGameplayTag& Tag : EffectTags)
-	{
-		//broadcast tags to widget controller
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *Tag.ToString());
-	}
+	EffectAssetTags.Broadcast(EffectTags);
+	
 }
